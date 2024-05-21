@@ -1,6 +1,6 @@
 {
   "name": "api-accelerate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A framework for rapid development of reliable, functional APIs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,8 @@
     "express"
   ],
   "author": "Keith Hilen",
-  "license": "ISC",
+  "repository": "https://github.com/keithhilen/api-accelerate",
+  "license": "MIT",
   "dependencies": {
     "axios": "^1.7.1",
     "bcrypt": "^5.0.1",
