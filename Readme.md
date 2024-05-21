@@ -360,7 +360,7 @@ Output:
 The framework provides a set of error classes for throwing exceptions. These are exported in the `accelerate` module. Example:
 
 ```
-const SystemError = require('accelerate').errors.SystemError;
+const SystemError = require('api-accelerate').errors.SystemError;
 throw new SystemError("<ERROR DESCRIPTION", <DATA OBJECT>);
 ```
 
@@ -677,20 +677,14 @@ The app can then be launched with the standard command:
 npm start
 ```
 
-The **run** file in the `api-accelerate\bin folder has just this code:
-
-```
-require('accelerate')().run();
-```
-
 #### Server Launch Code Alternative
 
-It is possible to incorporate this code into your own server. For example:
+It is possible to launch API Accelerate from your own server. For example:
 
 **./server.js**
 
 ```
-require('accelerate')().run();
+require('api-accelerate')().run();
 ```
 
 This code creates an app instance and then runs it. 
@@ -705,7 +699,7 @@ node server
 
 It is also possible to run the server this way:
 ```
-require('accelerate')().start();
+require('api-accelerate')().start();
 ```
 
 When the __run__ method starts the server it also sets an event listener for CTRL-C press, and stops the server gracefully. The __start__ method does not capture CTRL-C, so that the process is halted immediately by the OS. 
@@ -719,11 +713,11 @@ Here are the different configuration methods:
 
 | Method | Example | Description |
 | --- | --- | --- |
-| Default | ```require('accelerate')().run();``` | Looks for the default __config.js__ file. |
-| Other file | ```require('accelerate')('<file name>.js').run();``` | Provides a script that exports config information. |
-| JSON file | ```require('accelerate')('<file name>.json').run();``` | Provides an alternate JSON configuration file. |
-| JSON string | ```require('accelerate')('<JSON string>').run();``` | Provides a JSON string that is parsed. |
-| Object | ```require('accelerate')(<object>).run();``` | Provides an object. Equivalent to a parsed JSON string. |
+| Default | ```require('api-accelerate')().run();``` | Looks for the default __config.js__ file. |
+| Other file | ```require('api-accelerate')('<file name>.js').run();``` | Provides a script that exports config information. |
+| JSON file | ```require('api-accelerate')('<file name>.json').run();``` | Provides an alternate JSON configuration file. |
+| JSON string | ```require('api-accelerate')('<JSON string>').run();``` | Provides a JSON string that is parsed. |
+| Object | ```require('api-accelerate')(<object>).run();``` | Provides an object. Equivalent to a parsed JSON string. |
 The server will inspect the parameter and determine if it is a JS file name, a JSON file name, a JSON string or an object. 
 These alternative methods can be useful for activities such as testing or deployment branching. 
 
@@ -745,7 +739,7 @@ Event listeners are registered using the `on` function. Example:
 ```
 // test.js
 
-const app = (require('accelerate'))();
+const app = (require('api-accelerate'))();
 
 app.on('start', () => {
   app.logger.info('START');
