@@ -88,7 +88,7 @@ When the controller receives the request, it extracts a responder object and use
 This app can now be extended by adding more routes and controllers. The configuration can be extended to add additional capabilities, such as database access. 
 
 ### Sample Projects
-Sample projects can be found at [API Accelerate Demos](https://github.com/keithhilen/api-accelerate-demo).
+Sample projects can be found at [API Accelerate Demos](https://github.com/keithhilen/api-accelerate-demos).
 
 ## Application Structure
 
@@ -656,7 +656,7 @@ router.route('/object')
 ## Sample Projects
 A set of sample projects can be found here:
 
-[https://github.com/keithhilen/api-accelerate-demo](https://github.com/keithhilen/api-accelerate-demo)
+Sample projects can be found at [API Accelerate Demos](https://github.com/keithhilen/api-accelerate-demos).
 
 These demonstrate how to use the various features of APi Accelerate. 
 
