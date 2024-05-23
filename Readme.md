@@ -1,6 +1,6 @@
 
 # API Accelerate
-_A Node.js framework for web Services_
+_**A Node.js framework for building web APIs**_
 
 API Accelerate is a Node.js framework that simplifies the development of APIs. It creates a wrapper around Express.js and extends it with services such as logging, database access and error handling. 
 
@@ -62,33 +62,38 @@ exports.get = async (req, res) => {
 }
 ```
 
-5․ Run the server:
+5․ Run the server in a terminal window:
 
 ```
 npm start
 ```
 
-6․ Issue a request using a client such as Curl:
+6․ In another window, issue a request using a client such as Curl:
 
 ```
 curl http://127.0.0.1:10000
 ```
 
-You should see the response "Hello, world"
+You should see the response `Hello, world`. 
+
+7․ Terminate the app by pressing **Ctl-C** in the app window. 
 
 ### Explanation of the Code
-The start script creates, configures and runs an API Accelerate app. 
+The start script instantiates, configures and runs an app. 
 
-API Accelerate looks for the configuration file in the project root. In this example, the sole configuration property is the port number the server listens on.  
+The framework looks for the configuration file in the project root. In this example, the configuration is minimal, specifying only the port number on which the server listens. 
 
-API Accelerate looks in folder **routes** for route files. It loads each file it finds and calls the entry point to configure it. Note that the framework passes a router object to which routes are added. This particular route file sets up a route to **GET** on path **/**. It routes requests to the controller method **test**. 
+The framework then looks in folder **routes** for route files. It loads each file it finds and calls the entry point to initialize it. Note that the framework passes a router object to which routes are added. 
 
-When the controller receives the request, it extracts a responder object and uses it to respond back to the client with a text message. 
+This particular route file sets up a route to **GET** on path **/**. The route is bound to controller method **test**. When the controller receives the request, it extracts a responder object and uses it to respond back to the client with a text message. 
 
-This app can now be extended by adding more routes and controllers. The configuration can be extended to add additional capabilities, such as database access. 
+This app can now be extended by adding more routes and controllers. The configuration can be extended to use additional capabilities, such as database access. 
 
-### Sample Projects
-Sample projects can be found at [API Accelerate Demos](https://github.com/keithhilen/api-accelerate-demos).
+## Demo Apps
+A set of demo apps can be found at
+[API Accelerate Demos](https://github.com/keithhilen/api-accelerate-demos).
+
+These demonstrate various features of the framework. 
 
 ## Application Structure
 
@@ -110,19 +115,19 @@ By convention, a project includes these folders:
 
 ### Startup and Config
 
-The API Accelerate run script starts the app. This script also provides control to stop the app gracefully. It listens for Ctl-C, terminates the app and waits for it to finish. 
+The **run** script starts the app. This script also provides control to stop the app gracefully by listening for **Ctl-C** and terminating gracefully. 
 
-Invoke the run script with this command:
+Once the **start** script is configured in **package.json**, the app can be started with this command:
 
 ```
 npm start
 ```
 
-This command prompts API Accelerate to create, configure and run an app. It then looks for the config file in the project root and begin. By default it scans folder **routes** for route files. It loads each file it finds and calls the entry point to configure it. Note that the framework passes an Express router object. Routes are added to this object per Express. 
+This command prompts the framework to create, configure and run an app. It starts by looking for the config file in the project root. By default it then scans folder **routes** for route files. It loads each route file it finds and calls the entry point to initialize it. The framework passes an **Express** router object to the entry point. Routes are added to this object. 
 
 ### Requests
 
-When a request comes in, the route passes it to a controller for processing. The controller receives the request, extracts a responder object and uses it to respond back to the client. 
+When a request arrives, the route passes it to a controller for processing. The controller receives the request, extracts a responder object and uses it to respond back to the client. 
 
 The request object contains a property called **app**. This provides access to framework services, such as logging and database querying. 
 
@@ -132,7 +137,7 @@ The application requires a configuration file. A simple application can operate 
 
 By default, the framework will look for file **config.js** file in the root directory. 
 
-#### Examnple
+#### Configuration File Example
 This is an example of a minimal configuration file:
 
 ```
@@ -143,7 +148,7 @@ module.exports = {
 }
 ```
 
-In this example, the only configuration setting is the port number the server listens on. 
+The only configuration setting is the port number on which the server listens. Even this setting is optional - the port number defaults to **80**. 
 
 #### Configuration Sections
 
@@ -157,24 +162,20 @@ The config file is organized in sections.
 | `database` | Defines database access parameters, such as server address and credentials. |
 | `app` | Provides settings the app logic can use to configure its operations. |
 
-#### Server Config Section
+#### Server Configuration Section
 
 | Parameter      | Description |
 | --- | --- |
 | port          | The port the server listens on. Default is 80. |
 | timeout       | The interval in milliseconds after which a request will time out. Default is 30 seconds. |
-| prettify_json | Specifies whether JSON strings sent back to the client are formatted for human readabiity. Defajult is __false__. |
+| prettify_json | Specifies whether JSON strings sent back to the client are formatted for human readability. Default is __false__. |
 
-#### Other Config Sections
-
-Other configurations will be described in the sections that follow. 
-
-### Routing Configuration
+### Routing
 API Accelerate scans the routes folder recursively to find and invoke all route files. It passes an [Express Router object](https://expressjs.com/en/4x/api.html#router) to the entry point. 
 
 The application can provide as many or as few route files as needed. The general guidance is that each route file define a set of related routes for a particular process or resource type. 
 
-A route file should not include any logic other than what is needed to pass requests to a controller. 
+A route file should not include any logic other than what is needed to route requests to a controller. 
 
 Example route file:
 
@@ -201,46 +202,22 @@ It is possible to omit the router configuration section, in which case the defau
 
 | Parameter      | Description |
 | --- | --- |
-| name         | An optional identifying name. This may be useful in logs. |
+| name         | An optional identifying name. This can be useful in logs. |
 | path         | The base path for all routes. Default is "/". |
 | folder       | The folder where route files are located. Default is "/routes". |
 | params       | Additional parameters specific to the router which are used by application logic. |
 
-It is possible to define more than one router by providing an array of router config objects. By convention, the parameter name is called "routers" in this case. 
-
-#### Logger Configuration
-
-| Parameter    | Description |
-| --- | --- |
-| system       | Log system information. Default is __false__. |
-| request      | Log API requests. Default is __false__. |
-| trace        | Log trace calls. Default is __false__. |
-| query        | Log database queries. Default is __false__. |
-| exception    | Log exceptions. Default is __true__. |
-
-#### Database Configuration
-
-| Parameter    | Description |
-| --- | --- |
-| adapter     | Which adapter to use. Current options are "mysql" or "postgres". |
-| host        | The database server host name. |
-| user        | The user name. |
-| password    | The user password. |
-| database    | The database to use |
-| port        | The database server port. |
-| connections | The maximum number of simultaneous connections to allow. |
-
-
+It is possible to define more than one router by providing an array of router config objects. (By convention, the parameter name is called "routers" when there is more than one. However, the framework treats keywords "router" and "routers" identically. 
 
 ### Controllers
 A controller receives requests and invokes the appropriate logic. A standard Express controller method receives Express request and response objects as parameters. 
 
-The framework exposes a context object to the app. It injects this object into the Express request object so it is available to app logic. The context object provides services such as a responder, databaser management, logging and others. 
+The framework exposes a context object to the app. It injects this object into the Express request object so it is available to app logic. The context object provides services such as responder, database manager, and logging. 
 
 The context can be obtained in this way:
 
 ```
-  var context = req. context;
+  var context = req.context;
 ```
 
 Here is an example of a simple controller. 
@@ -259,7 +236,7 @@ exports.get = async (req, res) => {
 }
 ```
 
-Note that the logic extracts the context from the request and passes it to the model for its use. The controller sends a response back to the client via the responder object. This object provides a variety of response methods. In this example, it returns data explicitly in JSON format. The responder takes care of the details of formatting the data and returning the proper response code. 
+Note that the logic extracts the context from the request and passes it to the model for its use. The controller sends a response back to the client via the responder object. This object provides a variety of response methods. In this example, it returns data explicitly in JSON format. The responder takes care of the details of formatting the data and returning the proper mime type and response code. 
 
 Note that the controller catches and handles errors. In many cases, the responder can automatically map an error to an appropriate HTTP response code. For example, if the model throws __Record Not Found__, the controller simply passes this to the responder, which generates a 404 response. This reduces the complexity of the controller code and ensures a consistent treatment of errors. 
 
@@ -281,7 +258,7 @@ Note that the controller catches and handles errors. In many cases, the responde
 | `notFound (req, res, msg)`       | Returns HTTP code Not Found. | 404 | N/A |
 | `unauthorized (req, res, msg)`   | Returns HTTP code Unauthorized. | 401 | N/A |
 | `failure (req, res, err)`        | Returns HTTP code Server Error. | 500 | N/A |
-| `error (req, res, err)`          | Analyzes the exception object passed to it and selects an approporiate response code. | See descriptions in __Errors__ section | N/A |
+| `error (req, res, err)`          | Analyzes the exception object passed to it and selects an appropriate response code. | See descriptions in __Errors__ section | N/A |
 
 ### CSV and Tabular Responses
 
@@ -370,7 +347,7 @@ If an error is passed to the response object, it will be mapped to an HTTP error
 
 #### Error classes
 
-| Error | Parameters | Description | HTTP Code |
+| Class | Parameters | Description | HTTP Code |
 | --- | --- | --- | --- |
 | Error | `message` | A general error that produces a message | 500 |
 | SystemError | `message`, `info` | Thrown when there is some problem at the system level. | 500 |
@@ -378,9 +355,9 @@ If an error is passed to the response object, it will be mapped to an HTTP error
 | DuplicateError | `message`, `id`, `info` | The identity of a resource already exists. | 400 |
 | NotAllowedError | `message`, `info` | The requested operation is not allowed. | 401 |
 | NotImplementedError | `message` | The request type is not implemented yet. | 501 |
-| FileError | `message`, `info` | An error occurred on file I/O. | 400 |
+| FileError | `message`, `info` | An error occurred during file I/O. | 400 |
 | HttpError | `message`, `url`, `info` | An error occurred accessing the given URL. This can occur when the server makes an HTTP request to another service. | 400 |
-| DatabaseError | `query`, `values`, `info` | An error occurred when performing a database query.  | 400 |
+| DatabaseError | `query`, `values`, `info` | An error occurred when performing a database query, where the error is something other than "not found" or "duplicate". | 400 |
 | ImageError | `message`, `info` | An error occurred when processing an image or image file. | 400 |
 
 #### Error Parameters
@@ -395,13 +372,13 @@ If an error is passed to the response object, it will be mapped to an HTTP error
 | `values` | Array | The query values associated with the error. |
 
 ### Models
-Per the MVC pattern, models are designed to handle rules, data and business logic. 
+Per the MVC pattern, models are designed to manage business logic. 
 
-Generally, a model should accept the server object so that it has access to services such as logging and database access. 
+Generally, model methods should accept the server object so that it has access to services such as logging and database access. 
 
-Models that perform I/O need to be implemented with callbacks or promises so they do not block request threads. 
+Models that perform I/O need to be implemented with asynchronous callbacks or promises so they do not block request threads. 
 
-Here is an example of a model that peforms loan amortization:
+Here is an example of a model that performs loan amortization with an asynchronous method:
 
 ```
 // models/amortization.js
@@ -448,12 +425,12 @@ exports.amortize = async (context, params) => {
 ```
 ### Database
 #### Overview
-The framework natively supports MySQL database access. Postgres and other databases will be added in future. ORM support is under evaluation as a possible feature. 
+The framework natively supports MySQL database access. Postgres and other databases will be added in future. ORM support is under evaluation. 
 
 #### Configuration
 It is necessary to configure the system for database access. The configuration specifies information such as the server address and credentials. 
 
-When the application starts, the framework uses the configuration settings to create a database access object which is then available in the context. 
+When the application starts, the framework uses the configuration settings to create a database access object which is then available in the app context. 
 
 Example of database configuration:
 
@@ -477,7 +454,7 @@ This configuration specifies the host, port, user ID, password and the number of
 
 Note this example also demonstrates the use of environment variables for configuration. 
 
-##### Configuration Settings
+##### Database Configuration
 
 | Parameter | Setting | Default |
 | --- | --- | --- |
@@ -491,7 +468,7 @@ Note this example also demonstrates the use of environment variables for configu
 | `connections` | The number of connections in the connection pool. This can be useful for performance tuning. | 100 |
 | `logging` | Settings for controlling logging output from the database logic, as a nested object. | N/A |
 
-##### Logging Configuration Settings
+##### Database Logging Configuration
 These settings can be useful for debugging.
 
 | Parameter | Setting | Default |
@@ -499,13 +476,12 @@ These settings can be useful for debugging.
 | `connections` | Log when connections are allocated or released. | `false` |
 | `queries` | Log all queries performed. | `false` |
 
-#### Database Access
+#### Database Calls
 
-The database is accessible from within the application to make calls. App property `db` provides a means to establish a connection. 
+The database is accessible from within the application to make calls. App property `db` is an object that can be used to establish a database connection. 
 
 ##### Example
 
-Here is an example of a method that performs database access:
 
 ```
 const get = async (context, person_id) => {
@@ -553,24 +529,37 @@ In this case, the best practice is to release the connection in the `finally` bl
 
 #### Database Access Methods
 
-Database methods all receive a SQL query, which may have placeholders, and an array of values to replace the placeholders. If no placeholders are provided, the values may be omitted. 
+Database methods are exposed by the connection object. All these methods receive a SQL query, which may have placeholders, and an array of values to replace the placeholders. If no placeholders are used, the values may be omitted. 
 
 | Call | Description |
 | --- | --- |
-| `readOne(q, v)` | This method expects to read exactly one record. If no records are available, it throws a ??? error. If more than one record is available, it throws a ??? error. |
-| `readList(q, v)` | This method read zero or more records. |
+| `readOne(q, v)` | This method expects to read exactly one record. If no records are available, it throws a `NotFoundError`. If more than one record is available, it throws a generic `DatabaseError`. |
+| `readList(q, v)` | This method reads zero or more records. |
 | `insert(q, v)` | This method inserts a new record. |
 | `update(q, v)` | This method updates one or more records. |
-| `insertUpdate(q, v, v2)` | This performs a MySQL style `INSERT ... ON ... UPDATE` query. |
+| `upsert(q, v, v2)` | This performs a MySQL style `INSERT ... ON ... UPDATE` query. |
 | `delete(q, v)` | This method deletes one or more records. |
 | `query(q, v)` | This method makes any type of query. |
 
 #### References
-https://www.npmjs.com/package/mysql
+[https://www.npmjs.com/package/mysql](https://www.npmjs.com/package/mysql)
 
 
 ### Logging
+#### Overview
 TBD
+#### Logger Configuration
+
+| Parameter    | Description |
+| --- | --- |
+| system       | Log system information. Default is __false__. |
+| request      | Log API requests. Default is __false__. |
+| trace        | Log trace calls. Default is __false__. |
+| query        | Log database queries. Default is __false__. |
+| exception    | Log exceptions. Default is __true__. |
+
+
+
 ### Helpers
 TBD
 
@@ -604,7 +593,7 @@ During login, these actions are completed in sequence:
 * __Tokenize__ - The session object is used to generate a token. 
 * __Respond__ - The token is passed back to the client. 
 
-The authenticator provides a default method to complete each action. The app needs to override some or all of these actions by providing its own methods. The **receive** method generally should not be overriden. The default **extract** action extracts parameters *user_name* and *password* from the request body. The app only needs tpo replace this method if different parameters are used. The app must provide the **validate** method since the framework provides no standard account management capabilities. The **establish** method creates a session object with *account_id* and *user_name* as properties. The app only needs to replace this method if different properites are needed. The **tokenize** method adds timestamp info to the session and then signs the object to create the token. There is rarely a reason to replace this method. The **respond** method returns the token in a data object, and generally does not need to be replaced. 
+The authenticator provides a default method to complete each action. The app needs to override some or all of these actions by providing its own methods. The **receive** method generally should not be overridden. The default **extract** action extracts parameters *user_name* and *password* from the request body. The app only needs to override this method if different parameters are used. The app must provide the **validate** method since the framework provides no standard account management capabilities. The **establish** method creates a session object with *account_id* and *user_name* as properties. The app only needs to override this method if different properties are needed. The **tokenize** method adds timestamp info to the session and then signs the object to create the token. There is rarely a reason to override this method. The **respond** method returns the token in a data object, and generally does not need to be overridden. 
 
 The login process can be configured as part of the app initialization. 
 
@@ -617,7 +606,7 @@ During authorization, these actions are completed in sequence:
 * __Parse__ - The token is parsed to extract its contents. 
 * __Inject__ - The session information from the token is injected into the context so it is available to the app.  
 
-The authorizor provides a default method to complete each action. The app needs to override some or all of these actions by providing its own methods. The **receive** method generally should not be overriden. The default **extract** action extracts the *authorization* header from the request. The app only needs replace this method if the token is passed in a different property. The **parse** method parses the token to expose its contents. There is rarely a reason to replace this method. The **inject** method injects the session object into the context for later use. 
+The authorizer provides a default method to complete each action. The app needs to override some or all of these actions by providing its own methods. The **receive** method generally should not be overridden. The default **extract** action extracts the *authorization* header from the request. The app only needs override this method if the token is passed in a different property. The **parse** method parses the token to expose its contents. There is rarely a reason to override this method. The **inject** method injects the session object into the context for later use. 
 
 Note that the controller performs a call to *next()* as the final action, so that the subsequent route controller gets invoked.  
 
@@ -632,7 +621,7 @@ The context object contains an object named *auth*. This provides access to the 
 | --- | --- |
 | buildLogin | Returns a login manager which can be used to perform the login action. |
 | buildAuthorization | Returns an authorization manager which can be used to perform the process. |
-| hashPassword | A method which accepts a password and returns a hased-value. This is used when passwords are set and when validated. |
+| hashPassword | A method which accepts a password and returns a hashed value. This is used when passwords are set and when validated. |
 
 The login and authorization managers provide two methods: *controller* and *setAction*. The *controller* is the request process for the manager, so control is routed to this when the incoming request is processed. The *setAction* method allows the app to override process methods as describe above. 
 
@@ -652,13 +641,6 @@ router.route('/object')
   .get(auth.authorize, objects.list);
 ```
 
-
-## Sample Projects
-A set of sample projects can be found here:
-
-Sample projects can be found at [API Accelerate Demos](https://github.com/keithhilen/api-accelerate-demos).
-
-These demonstrate how to use the various features of APi Accelerate. 
 
 ## Advanced Topics
 
@@ -707,9 +689,9 @@ When the __run__ method starts the server it also sets an event listener for CTR
 
 ### Alternative Configuration Methods
 
-By default the server looks for configuration file __config.js__. However there are alternative methods. For example, the app can provide a configuration object itself, or pass a JSON string in. This flexibility can be helpful for automated testing, or for implementing systems that start multiple servers. 
+By default the server looks for configuration file __config.js__. However there are alternative methods. For example, the app can provide a configuration object itself, or pass a JSON string or file. This flexibility can be helpful for automated testing, or for implementing systems that start multiple servers. 
 
-Here are the different configuration methods:
+These are the configuration methods:
 
 | Method | Example | Description |
 | --- | --- | --- |
