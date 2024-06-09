@@ -1,4 +1,3 @@
-
 # API Accelerate
 _**A Node.js framework for building web APIs**_
 
@@ -115,7 +114,7 @@ By convention, a project includes these folders:
 
 ### Startup and Config
 
-The **run** script starts the app. This script also provides control to stop the app gracefully by listening for **Ctl-C** and terminating gracefully. 
+The API Accelerate run script starts the app. This script also provides control to stop the app gracefully. It listens for CTRL-C, terminates the app and waits for it to finish. 
 
 Once the **start** script is configured in **package.json**, the app can be started with this command:
 
@@ -123,11 +122,11 @@ Once the **start** script is configured in **package.json**, the app can be star
 npm start
 ```
 
-This command prompts the framework to create, configure and run an app. It starts by looking for the config file in the project root. By default it then scans folder **routes** for route files. It loads each route file it finds and calls the entry point to initialize it. The framework passes an **Express** router object to the entry point. Routes are added to this object. 
+This command prompts API Accelerate to create, configure and run an app. It then looks for the config file in the project root and begin. By default, it scans folder **routes** for route files. It loads each file it finds and calls the entry point to configure it. Note that the framework passes an Express router object. Routes are added to this object per Express. 
 
 ### Requests
 
-When a request arrives, the route passes it to a controller for processing. The controller receives the request, extracts a responder object and uses it to respond back to the client. 
+When a request comes in, the route passes it to a controller for processing. The controller receives the request, extracts a responder object, and uses it to respond back to the client. 
 
 The request object contains a property called **app**. This provides access to framework services, such as logging and database querying. 
 
@@ -157,7 +156,7 @@ The config file is organized in sections.
 | Section  | Description |
 | --- | --- |
 | `server` | Defines the general operation of the server. |
-| `router` | Changes the default router options, and adds additional routers if needed. |
+| `router` | Changes the default router options and adds additional routers if needed. |
 | `logger` | Sets logging options to control which log entry types are emitted. |
 | `database` | Defines database access parameters, such as server address and credentials. |
 | `app` | Provides settings the app logic can use to configure its operations. |
@@ -168,12 +167,12 @@ The config file is organized in sections.
 | --- | --- |
 | port          | The port the server listens on. Default is 80. |
 | timeout       | The interval in milliseconds after which a request will time out. Default is 30 seconds. |
-| prettify_json | Specifies whether JSON strings sent back to the client are formatted for human readability. Default is __false__. |
+| prettify_json | Specifies whether JSON strings sent back to the client are formatted for human readability. The default is __false__. |
 
 ### Routing
 API Accelerate scans the routes folder recursively to find and invoke all route files. It passes an [Express Router object](https://expressjs.com/en/4x/api.html#router) to the entry point. 
 
-The application can provide as many or as few route files as needed. The general guidance is that each route file define a set of related routes for a particular process or resource type. 
+The application can provide as many or as few route files as needed. The general guidance is that each route file should define a set of related routes for a particular process or resource type. 
 
 A route file should not include any logic other than what is needed to route requests to a controller. 
 
@@ -212,7 +211,7 @@ It is possible to define more than one router by providing an array of router co
 ### Controllers
 A controller receives requests and invokes the appropriate logic. A standard Express controller method receives Express request and response objects as parameters. 
 
-The framework exposes a context object to the app. It injects this object into the Express request object so it is available to app logic. The context object provides services such as responder, database manager, and logging. 
+The framework exposes a context object to the app. It injects this object into the Express request object so that it is available to app logic. The context object provides services such as a responder, databaser management, logging, and others. 
 
 The context can be obtained in this way:
 
@@ -264,7 +263,7 @@ Note that the controller catches and handles errors. In many cases, the responde
 
 The __csv__ and __tabular__ responder methods will convert a record set to the corresponding output formats. A tabular output is simply text with cells evenly padded. 
 
-Both of these methods convert an array of record objects to a grid format with headers. When the record array is passed in, the responder will parse the keys of the records to determine the column names. Example:
+These two methods both convert an array of record objects to a grid format with headers. When the record array is passed in, the responder will parse the keys of the records to determine the column names. Example:
 
 ```
 exports.get = async (req, res) => {
@@ -372,13 +371,13 @@ If an error is passed to the response object, it will be mapped to an HTTP error
 | `values` | Array | The query values associated with the error. |
 
 ### Models
-Per the MVC pattern, models are designed to manage business logic. 
+Per the MVC pattern, models are designed to handle rules, data, and business logic. 
 
 Generally, model methods should accept the server object so that it has access to services such as logging and database access. 
 
 Models that perform I/O need to be implemented with asynchronous callbacks or promises so they do not block request threads. 
 
-Here is an example of a model that performs loan amortization with an asynchronous method:
+Here is an example of a model that performs loan amortization:
 
 ```
 // models/amortization.js
@@ -423,6 +422,21 @@ exports.amortize = async (context, params) => {
 
 }
 ```
+
+### Custom Initialization
+
+In some instances, the app needs to perform some custom initialization at startup. A streamlined way of accomplishing this is with an automatic initialization script. 
+
+At startup, the framework looks for a file called `initialize.js` in the root folder of the application. If found, the framework loads and invokes it. If not found, no action is taken. 
+
+`initialize.js` exports a function call with two parameters: the app object, provides access to framework services, and the app configuration. 
+
+```
+module.exports = async (app, config) => {
+ ... intialization logic here
+}
+```
+
 ### Database
 #### Overview
 The framework natively supports MySQL database access. Postgres and other databases will be added in future. ORM support is under evaluation. 
@@ -450,7 +464,7 @@ Example of database configuration:
   }
 ```
 
-This configuration specifies the host, port, user ID, password and the number of connections. In addition, it specifies additional logging settings, which can be useful during development and testing. 
+This configuration specifies the host, port, user ID, password, and the number of connections. In addition, it specifies additional logging settings, which can be useful during development and testing. 
 
 Note this example also demonstrates the use of environment variables for configuration. 
 
@@ -509,9 +523,18 @@ This logic must be wrapped in a promise because it performs asynchronous I/O.
 
 ##### Connection Management
 
-Connections must be obtained, used, then released. In this example, the `perform` method takes care of allocating a database connection, executing the app logic, then releasing the database connection. This is a safe way to prevent unreleased connections. 
+Connections must be obtained, used, then released. The `db` object provides these methods for managing connections:
 
-It is also possible to manually allocate and release the connection. This is not generally recommended, but can be useful in some cases. 
+| Call | Description |
+| --- | --- |
+| `perform(callback)` | Establishes a connection then invokes the callback function. The callback contains logic for interacting with the database. When the function terminates, the connection is released automatically. |
+| `connect()` | Establish a connection for accessing the database. This connection must be released when no longer needed. |
+| `release(connection)` | Release a connection. Note the connection object also has a `release` method which invokes this. |
+
+
+In this example, the `perform` method takes care of allocating a database connection, executing the app logic, then releasing the database connection. This is a safe way to prevent unreleased connections. 
+
+It is also possible to manually allocate and release the connection. This is not generally recommended but can be useful in some cases. 
 
 ```
     try {
@@ -527,9 +550,11 @@ It is also possible to manually allocate and release the connection. This is not
 ```
 In this case, the best practice is to release the connection in the `finally` block to ensure connections are not left open. 
 
+It is also a good practice to limit the amount of time spent inside the callback. Any logic that doesn't require a connection should be moved outside of the callback wherever possible. There are a limited number of connections available in the pool, so optimizing this can result in better performance. 
+
 #### Database Access Methods
 
-Database methods are exposed by the connection object. All these methods receive a SQL query, which may have placeholders, and an array of values to replace the placeholders. If no placeholders are used, the values may be omitted. 
+The connection exposes methods used for accessing the  database. Database methods all receive a SQL query, which may have placeholders, and an array of values to replace the placeholders. If no placeholders are provided, the values may be omitted. 
 
 | Call | Description |
 | --- | --- |
@@ -563,84 +588,262 @@ TBD
 ### Helpers
 TBD
 
+### Handlers
+
+The framework provides a set of predefined handlers that can be tailored to the application. A handler manages a process, such as the response to a particular type of request. For example, the framework provides a handler that manages the login process. 
+
+The process a handler implements is broken down into a series of steps specific to the handler. Each step is implemented with a default method, which can be overridden. Methods are overridden via matching setter methods exposed in the handler instance. 
+
+A handler instance is created based on the handler. This is typically done only once during app initialization, and then the instance is available for use during request processing. 
+
+Each handler has a unique name which is used to select the instance to create. 
+
+#### Handler Creation
+
+The _handlers_ object is made available in the _app_ instance. This object provides function `create`, which is used to create a handler instance. 
+
+| Param | Description |
+| --- | --- |
+| `name` | The name of the handler. Mandatory. |
+| `app` | The instance of the app, which is passed from the framework to the initialization code. Mandatory. |
+| `params` | If provided, these params are used to configure the handler instance. If not provided, the handler may fetch configuration info from the app config object. Note that not all handlers require configuration info. Optional. |
+
+The handler instance exposes setter functions which allow the app to override methods in the process. Each setter function returns the handler instance, so they can be chained together. 
+
+
+Example:
+
+```
+var handler = app.handlers.create('login_user', app)
+  .authenticate((context, credentials) => {
+  ... authenticate account using credentials
+  }
+```
+
+More details and examples are provided in the sections below, including in _Authentication_.
+
+
 ### Authentication
 
 #### Overview
-The framework provides basic configurable authentication using a Java Web Token (JWT). 
+The framework provides basic configurable authentication using a Java Web Token (JWT). This will be extended in future with additional authentication methods and services. 
 
-Authentication provides two processes: login and authorization. Login uses credentials to validate the account and establish a session. This process generates a token which is sent back to the client. The client then passes this token back to the server on subsequent calls to perform authorization. 
+The login process uses credentials to verify the user exists and to generate an access token and pass it back to the client. That token is used in the authentication process that takes place at the beginning of each subsequent request. 
+
+Other processes are needed to create and manage user accounts. 
+
+#### Authentication Handlers
+
+The following handlers provide services related to account management and authentication:
+
+| Handler | Description |
+| --- | --- |
+| `login_user` | Login based on credentials. |
+| `authenticate_user` | A middleware function that establishes a session for the user before processing a request.  |
+| `register_user` | Register a new user account. |
+| `change_user_password` | Change the password for a user account. |
+
+Future handlers will be provided for OAuth and other authentication needs. 
 
 #### Configuration
 
-The configuration must contain an **auth** section. 
+Authentication service handlers require some or all of these configuration parameters:
 
 | Parameter | Setting | Default |
 | --- | --- | --- |
 | `method ` | The type of authentication method to use. Currently only *jwt* is supported. | Required setting - no default. |
 | `jwt_secret ` | Used for signing the token. | Required setting - no default. |
 | `jwt_expiration ` | The maximum lifetime of the token, in seconds. | Defaults to 0, meaning never expires. |
-| `password_hash_type ` | The type of hash used on passwords. | MD5 is the default. |
-| `password_salt ` | A string that as appended to the password before hashing to create a unique hashing. |  Required setting - no default. |
+| `password_hash_type ` | The type of hash used on passwords. | MD5 is the default and is currently the only supported algorithm. |
+| `password_salt ` | A string that as appended to the password before hashing to create a unique hashing. |  If not provided, the password is not hashed, which is generally a bad practice. |
+| `regex_user_name ` | A regex string used to validate the user name. If not provided, no validation is performed. | None. |
+| `regex_password ` | A regex string used to validate the user name. If not provided, no validation is performed. | None. |
+
+By default, these parameters are provided in the configuration file in the **auth** section. 
 
 #### Login
 
-During login, these actions are completed in sequence: 
+The standard login is based on user name and password. The credentials are used to authenticate the account and generate an access token, which is passed back to the client. 
 
-* __Receive__ - The controller receives the login information, usually as a POST. 
-* __Extract__ - The credential information is extracted from the request. 
-* __Validate__ - The app uses the credentials to validate access to a particular account. 
-* __Establish__ - The app establishes a session object which contains info such as the account ID. 
-* __Tokenize__ - The session object is used to generate a token. 
-* __Respond__ - The token is passed back to the client. 
+The login handler process consists of these steps, executed in sequence: 
 
-The authenticator provides a default method to complete each action. The app needs to override some or all of these actions by providing its own methods. The **receive** method generally should not be overridden. The default **extract** action extracts parameters *user_name* and *password* from the request body. The app only needs to override this method if different parameters are used. The app must provide the **validate** method since the framework provides no standard account management capabilities. The **establish** method creates a session object with *account_id* and *user_name* as properties. The app only needs to override this method if different properties are needed. The **tokenize** method adds timestamp info to the session and then signs the object to create the token. There is rarely a reason to override this method. The **respond** method returns the token in a data object, and generally does not need to be overridden. 
-
-The login process can be configured as part of the app initialization. 
-
-#### Authorization
-
-During authorization, these actions are completed in sequence: 
-
-* __Receive__ - The controller receives the login information, usually as a POST. 
-* __Extract__ - The token is extracted from the request. By default, it is in header *authorization*. 
-* __Parse__ - The token is parsed to extract its contents. 
-* __Inject__ - The session information from the token is injected into the context so it is available to the app.  
-
-The authorizer provides a default method to complete each action. The app needs to override some or all of these actions by providing its own methods. The **receive** method generally should not be overridden. The default **extract** action extracts the *authorization* header from the request. The app only needs override this method if the token is passed in a different property. The **parse** method parses the token to expose its contents. There is rarely a reason to override this method. The **inject** method injects the session object into the context for later use. 
-
-Note that the controller performs a call to *next()* as the final action, so that the subsequent route controller gets invoked.  
-
-The authorize process can be configured as part of the app initialization. 
-
-
-#### Initialization
-
-The context object contains an object named *auth*. This provides access to the authentication factory methods:
-
-| Parameter | Description |
+| Action | Description |
 | --- | --- |
-| buildLogin | Returns a login manager which can be used to perform the login action. |
-| buildAuthorization | Returns an authorization manager which can be used to perform the process. |
-| hashPassword | A method which accepts a password and returns a hashed value. This is used when passwords are set and when validated. |
+| `extract(context, req, res)` | Extract the credentials from the request. |
+| `encode(context, credentials)` | Encode the password, by default with MD5. The password itself is never stored. |
+| `authenticate(context, credentials)` | Use the credentials to locate a matching user account. If no account is found, throw a `NotFoundError` exception. |
+| `establish(context, account)` | Establish the token information. |
+| `tokenize(context, data)` | Create a token containing the account information. |
+| `respond(context, token, req, res)` | Respond back to the client with the token. |
 
-The login and authorization managers provide two methods: *controller* and *setAction*. The *controller* is the request process for the manager, so control is routed to this when the incoming request is processed. The *setAction* method allows the app to override process methods as describe above. 
+The default **extract** method extracts parameters `user_name` and `password` from the request body. The app only needs to replace this method if different parameters are used. 
 
-#### Routing
+The default **encode** method converts the plain text password into a hash using MD5. The configuration param
+`password_salt` is used to obfuscate the hash. This generally does not need to be overridden. 
 
-Login requests can be routed directly to a controller method which invokes the login process. Example:
+No default **authenticate** method is provided. If this method is not overridden, an error will occur when the handler is invoked. The reason for this is that the framework does not provide any logic to persist user account information. The application must provide this logic. 
+
+The **tokenize** method adds timestamp and expiration info to the session and then signs the object to create the token. There is rarely a reason to replace this method. The method uses configuration params `jwt_secret` and `jwt_expiration`. 
+
+The **respond** method returns the token in an object in the form `{token: xxxxx}`. This only needs to be overridden if a different response is expected. 
+
+Example:
+
+_Initialization_
 
 ```
-router.route('/auth')
-  .post(auth.login);
+var login_user = app.handlers.create('login_user', app)
+  .authenticate((context, credentials) => {
+    ... locate user account and return account object, or throw an error if not found
+  });
+```
+_Invocation_
+
+```
+const login = (req, res, next) => {
+  login_user(req, res, next);
+}
 ```
 
-Requests that require authorization can include the authorize call as middleware. Example:
+#### Authentication
+
+Once a user is logged in, the auth token must be passed with each request. By default, it is sent in the HTTP `Authorization` header. The authentication handler uses this token to establish a session before the app attempts to perform an action. 
+
+Since the authentication handler is designed to operate as middleware, the last thing it does is invoke the `next` method to pass control along. 
+
+The authentication handler process consists of these steps, executed in sequence: 
+
+| Action | Description |
+| --- | --- |
+| `extract(context, req, res)` | Extract the authentication token from the request. |
+| `parse(context, token)` | Parse the token to obtain authentication information and generate a session object. |
+| `inject(context, session)` | Inject the session object into the context. |
+
+The default **extract** method extracts the token from HTTP header `Authorization`. 
+
+The default **parse** method parses the token per the configuration params. 
+
+The default **inject** method injects the session info into the context object. 
+
+It is normally not necessary to override any of these methods. 
+
+Example:
+
+_Initialization_
 
 ```
-router.route('/object')
-  .get(auth.authorize, objects.list);
+var authentic_user = app.handlers.create('authentic_user', app);
 ```
 
+_Routing_
+
+```
+var auth = require('../../controllers/auth.js');
+var something = require('../../controllers/something');
+
+module.exports = (router, app) => {
+  router.route('/something')
+    .get(auth.authenticate, something.action);
+};
+
+```
+
+_Invocation_
+
+```
+const authenticate = (req, res, next) => {
+  authentic_user(req, res, next);
+}
+```
+#### Registration
+
+The standard account creation requires user name and password. These must be validated to ensure they comply with the requirements - for example, requiring a password have a mix of upper and lower case, special characters, and numbers. The user name must be available. 
+
+The registration handler process consists of these steps, executed in sequence: 
+
+| Action | Description |
+| --- | --- |
+| `extract(context, req, res)` | Extract the credentials from the request. |
+| `validate(context, credentials)` | Ensure the credentials comply with requirements. |
+| `encode(context, credentials)` | Encode the password, by default with MD5, to match with the stored one. |
+| `register(context, credentials)` | Attempt to create the account with the given credentials. If the user name is already in use, throw a `DuplicateError` exception. |
+| `respond(context, token, req, res)` | Respond back to the client with the new account information. |
+
+
+The default **extract** method extracts parameters `user_name` and `password` from the request body. The app only needs to replace this method if different parameters are used. 
+
+The default **validate** method ensures the user name and password comply with requirements. If configuration parameter `regex_user_name` is provided, it is used to perform a _regex_ test on the user name. If configuration parameter `regex_password` is provided, it is used to perform a _regex_ test on the password. If this is sufficient, this method does not need to be overridden. 
+
+The default **encode** method converts the plain text password into a hash using MD5. The configuration param
+`password_salt` is used to obfuscate the hash. This generally does not need to be overridden. 
+
+No default **register** method is provided. If this method is not overridden, an error will occur when the handler is invoked. The application must provide the logic to create the new account with the given credentials, or fail if the user name is not available. 
+
+The **respond** method returns the new account information in an object in the form `{account_id: xxxxx}`. This only needs to be overridden if a different response is expected. 
+
+Example:
+
+_Initialization_
+
+```
+var register_user = app.handlers.create('register_user', app)
+  .register((context, credentials) => {
+    ... create the new account, or throw a `DuplicateError` exception if taken
+  });
+```
+
+_Invocation_
+
+```
+const register = (req, res, next) => {
+  register_user(req, res, next);
+}
+```
+
+#### Change Password
+
+The standard account creation requires a user name and password. These must be validated to ensure they comply with the requirements - for example, requiring a password have a mix of upper and lower case, special characters and numbers. The user name must be available. 
+
+
+The password change handler process consists of these steps, executed in sequence: 
+
+| Action | Description |
+| --- | --- |
+| `extract(context, req, res)` | Extract the password from the request. |
+| `validate(context, credentials)` | Ensure the password complies with requirements. |
+| `encode(context, credentials)` | Encode the password, by default with MD5, to match with the stored one. |
+| `change(context, credentials)` | Change the password in the account. |
+| `respond(context, token, req, res)` | Respond back to the client with the new account information. |
+
+The default **extract** method extracts the *password* parameter from the request body. The app only needs to replace this method if this is different. 
+
+The default **validate** method ensures the password complies with requirements. If configuration parameter `regex_password` is provided, it is used to perform a _regex_ test on the password. If this is sufficient, this method does not need to be overridden. 
+
+The default **encode** method converts the plain text password into a hash using MD5. The configuration param
+`password_salt` is used to obfuscate the hash. This generally does not need to be overridden. 
+
+No default **change** method is provided. If this method is not overridden, an error will occur when the handler is invoked. The application must provide the logic to update the account with the new hashed password. 
+
+The **respond** method responds with HTTP code OK upon success. This only needs to be overridden if a different response is expected. 
+
+Example:
+
+_Initialization_
+
+```
+var change_user_password = app.handlers.create('change_user_password', app)
+  .change((context, credentials) => {
+    ... change the existing account with the new password
+  });
+```
+
+_Invocation_
+
+```
+const password = (req, res, next) => {
+  change_user_password(req, res, next);
+}
+```
 
 ## Advanced Topics
 
@@ -689,7 +892,7 @@ When the __run__ method starts the server it also sets an event listener for CTR
 
 ### Alternative Configuration Methods
 
-By default the server looks for configuration file __config.js__. However there are alternative methods. For example, the app can provide a configuration object itself, or pass a JSON string or file. This flexibility can be helpful for automated testing, or for implementing systems that start multiple servers. 
+By default, the server looks for configuration file __config.js__. However, there are alternative methods. For example, the app can provide a configuration object itself, or pass a JSON string in. This flexibility can be helpful for automated testing, or for implementing systems that start multiple servers. 
 
 These are the configuration methods:
 
@@ -700,8 +903,8 @@ These are the configuration methods:
 | JSON file | ```require('api-accelerate')('<file name>.json').run();``` | Provides an alternate JSON configuration file. |
 | JSON string | ```require('api-accelerate')('<JSON string>').run();``` | Provides a JSON string that is parsed. |
 | Object | ```require('api-accelerate')(<object>).run();``` | Provides an object. Equivalent to a parsed JSON string. |
-The server will inspect the parameter and determine if it is a JS file name, a JSON file name, a JSON string or an object. 
-These alternative methods can be useful for activities such as testing or deployment branching. 
+
+The server will inspect the parameter and determine if it is a JS file name, a JSON file name, a JSON string, or an object. These alternative methods can be useful for activities such as testing or deployment branching. 
 
 ### Lifecycle Events
 
@@ -762,3 +965,8 @@ TBD
 
 #### Multiple Databases
 TBD
+
+## Sample Projects
+A set of sample projects can be found at [API Accelerate Demos](https://github.com/keithhilen/api-accelerate-demos).
+
+These demonstrate how to use the various features of API Accelerate. 
